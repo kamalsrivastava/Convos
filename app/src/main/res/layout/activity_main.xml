@@ -72,17 +72,17 @@
         android:src="@drawable/camera" />
 
     <ImageView
-        android:id="@+id/imgChat"
-        android:layout_width="47dp"
-        android:layout_height="38dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="155dp"
-        android:layout_marginRight="155dp"
-        android:layout_marginBottom="41dp"
-        android:clickable="true"
-        android:src="@drawable/chat" />
+    android:id="@+id/imgChat"
+    android:layout_width="47dp"
+    android:layout_height="38dp"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginEnd="155dp"
+    android:layout_marginRight="155dp"
+    android:layout_marginBottom="41dp"
+    android:clickable="true"
+    android:src="@drawable/chat" />
 
     <ImageView
         android:id="@+id/settingBut"

@@ -28,7 +28,6 @@ import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-
 public class ChatActivity extends AppCompatActivity {
 
     String recieverImg, recieverUid, recieverName, senderUid;
@@ -37,7 +36,7 @@ public class ChatActivity extends AppCompatActivity {
     CardView btnsend;
     EditText etmsg;
     FirebaseAuth auth;
-    FirebaseDatabase database = null;
+    FirebaseDatabase database;
     public static String senderImg;
     public static String reciverIImg;
     String senderRoom, reciverRoom;
@@ -46,10 +45,12 @@ public class ChatActivity extends AppCompatActivity {
     MessageAdapter messageAdapter;
     private DatabaseReference senderChatreference,receiverChatReference;
     private String TAG = ChatActivity.class.getName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_head);
+
         database = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
 
@@ -63,7 +64,6 @@ public class ChatActivity extends AppCompatActivity {
         etmsg = findViewById(R.id.etmsg);
         recieverNName = findViewById(R.id.txtrecievername);
         profile = findViewById(R.id.imggChat);
-
 
         mmessangesAdapter = findViewById(R.id.msgadapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -82,7 +82,6 @@ public class ChatActivity extends AppCompatActivity {
         receiverChatReference = database.getReference().child("chats").child(reciverRoom).child("messages");
         senderChatreference = database.getReference().child("chats").child(senderRoom).child("messages");
         bindChildEventListener();
-
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -120,7 +119,6 @@ public class ChatActivity extends AppCompatActivity {
                                         Log.e("sendMessage", "Failed to send message", task.getException());
                                     }else{
                                         Toast.makeText(ChatActivity.this, "Sent message: " , Toast.LENGTH_SHORT).show();
-
                                     }
                                 }
                             });
@@ -146,17 +144,10 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
                 Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-
-                // A new comment has been added, add it to the displayed list
-//                Comment comment = dataSnapshot.getValue(Comment.class);
-
-                // ...
-                MessageModelClass msg=dataSnapshot.getValue(MessageModelClass.class);
+                MessageModelClass msg = dataSnapshot.getValue(MessageModelClass.class);
                 messagessArrayList.add(msg);
                 messageAdapter.notifyDataSetChanged();
-
                 Log.d(TAG, "onChildAddedSize:" + messagessArrayList.size());
-
             }
 
             @Override
@@ -168,30 +159,16 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-
-                // A comment has changed, use the key to determine if we are displaying this
-                // comment and if so remove it.
-                String commentKey = dataSnapshot.getKey();
-
-                // ...
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
                 Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-
-                // A comment has changed position, use the key to determine if we are
-                // displaying this comment and if so move it.
-//                Comment movedComment = dataSnapshot.getValue(Comment.class);
-                String commentKey = dataSnapshot.getKey();
-
-                // ...
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "postComments:onCancelled", databaseError.toException());
-
             }
         };
         senderChatreference.addChildEventListener(childEventListener);

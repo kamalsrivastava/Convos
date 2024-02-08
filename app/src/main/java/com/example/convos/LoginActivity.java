@@ -18,72 +18,95 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
-    Button button;
-    EditText email,password;
-    FirebaseAuth auth;
-    TextView signUp;
+    private EditText emailEditText;
+    private EditText passwordEditText;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        auth=FirebaseAuth.getInstance();
-        button=findViewById(R.id.btnLogin);
-        email=findViewById(R.id.etEmail);
-        password=findViewById(R.id.etPassword);
-        String epattern="[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
-        signUp=findViewById(R.id.txtSignUp);
+        auth = FirebaseAuth.getInstance();
 
-        signUp.setOnClickListener(new View.OnClickListener() {
+        emailEditText = findViewById(R.id.etEmail);
+        passwordEditText = findViewById(R.id.etPassword);
+
+        Button loginButton = findViewById(R.id.btnLogin);
+        TextView signUpTextView = findViewById(R.id.txtSignUp);
+
+        signUpTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this,RegistrationActivity.class);
-                startActivity(intent);
-                finish();
+                goToRegistrationActivity();
             }
         });
 
-        button.setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String Email=email.getText().toString();
-                String pass=password.getText().toString();
+                loginUser();
+            }
+        });
+    }
 
-                if((TextUtils.isEmpty(Email))){
-                    Toast.makeText(LoginActivity.this,"Enter the Email",Toast.LENGTH_SHORT).show();
-                }
-                else if(TextUtils.isEmpty(pass)){
-                    Toast.makeText(LoginActivity.this,"Enter the Password",Toast.LENGTH_SHORT).show();
-                }
-                else if(!Email.matches(epattern)){
-                    email.setError("Give Proper Email Address");
-                }
-                else if(pass.length()<8){
-                    password.setError("Enter Password longer than 8 character");
-                }
-                else{
-                    auth.signInWithEmailAndPassword(Email,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                try{
-                                    Intent intent=new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                }catch (Exception e){
-                                    Toast.makeText(LoginActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                            else{
-                                Toast.makeText(LoginActivity.this,task.getException().getMessage(),Toast.LENGTH_SHORT).show();
-                            }
+    private void goToRegistrationActivity() {
+        Intent intent = new Intent(LoginActivity.this, RegistrationActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void loginUser() {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        if (TextUtils.isEmpty(email)) {
+            showToast("Enter your email");
+            return;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            showToast("Enter your password");
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            emailEditText.setError("Invalid email address");
+            return;
+        }
+
+        if (password.length() < 8) {
+            passwordEditText.setError("Password must be at least 8 characters");
+            return;
+        }
+
+        signInUser(email, password);
+    }
+
+    private boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+    private void signInUser(String email, String password) {
+        auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            startMainActivity();
+                        } else {
+                            showToast("Authentication failed: " + task.getException().getMessage());
                         }
-                    });
-                }
+                    }
+                });
+    }
 
+    private void startMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+    }
 
-            }
-        });
-
+    private void showToast(String message) {
+        Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 }

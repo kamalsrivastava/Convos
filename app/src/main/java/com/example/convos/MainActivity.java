@@ -23,33 +23,86 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    FirebaseAuth auth;
-    RecyclerView mainUser;
-    UserAdapter adapter;
-    final FirebaseDatabase[] database = {null};
-    ArrayList<Users> usersArrayList;
-    ImageView imgLogOut;
-    ImageView cambut,settingbut;
+    private FirebaseAuth auth;
+    private RecyclerView mainUser;
+    private UserAdapter adapter;
+    private FirebaseDatabase database;
+    private ArrayList<Users> usersArrayList;
+    private ImageView imgLogOut;
+    private ImageView cambut, settingbut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        database[0] =FirebaseDatabase.getInstance();
-        auth=FirebaseAuth.getInstance();
-        cambut=findViewById(R.id.camBut);
-        settingbut=findViewById(R.id.settingBut);
+        initializeViews();
+        setupListeners();
+        setupFirebase();
+        setupRecyclerView();
+        checkUserLoggedIn();
+    }
 
-        DatabaseReference reference=database[0].getReference().child("user");
+    private void initializeViews() {
+        cambut = findViewById(R.id.camBut);
+        settingbut = findViewById(R.id.settingBut);
+        imgLogOut = findViewById(R.id.imgLogout);
+        mainUser = findViewById(R.id.rviewmainUser);
+    }
 
-        usersArrayList=new ArrayList<>();
+    private void setupListeners() {
+        imgLogOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showLogoutDialog();
+            }
+        });
 
+        settingbut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToSettingActivity();
+            }
+        });
+
+        cambut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startImageCaptureIntent();
+            }
+        });
+    }
+
+    private void setupFirebase() {
+        auth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
+    }
+
+    private void setupRecyclerView() {
+        mainUser.setLayoutManager(new LinearLayoutManager(this));
+        usersArrayList = new ArrayList<>();
+        adapter = new UserAdapter(MainActivity.this, usersArrayList);
+        mainUser.setAdapter(adapter);
+    }
+
+    private void checkUserLoggedIn() {
+        if (auth.getCurrentUser() == null) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            fetchUserListFromDatabase();
+        }
+    }
+
+    private void fetchUserListFromDatabase() {
+        DatabaseReference reference = database.getReference().child("user");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot:snapshot.getChildren()){
-                    Users users=dataSnapshot.getValue(Users.class);
+                usersArrayList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Users users = dataSnapshot.getValue(Users.class);
                     usersArrayList.add(users);
                 }
                 adapter.notifyDataSetChanged();
@@ -57,61 +110,44 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                // Handle database error
             }
         });
-        imgLogOut=findViewById(R.id.imgLogout);
+    }
 
-        imgLogOut.setOnClickListener(new View.OnClickListener() {
+    private void showLogoutDialog() {
+        Dialog dialog = new Dialog(MainActivity.this, R.style.dialog);
+        dialog.setContentView(R.layout.dialog_layout);
+        Button no = dialog.findViewById(R.id.btnNo);
+        Button yes = dialog.findViewById(R.id.btnYes);
+
+        yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog=new Dialog(MainActivity.this,R.style.dialog);
-                dialog.setContentView(R.layout.dialog_layout);
-                Button no,yes;
-                yes=dialog.findViewById(R.id.btnYes);
-                no=dialog.findViewById(R.id.btnNo);
-                yes.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseAuth.getInstance().signOut();
-                        Intent intent=new Intent(MainActivity.this, LoginActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                no.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
-            }
-        });
-
-        settingbut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent(MainActivity.this,SettingActivity.class);
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
-        cambut.setOnClickListener(new View.OnClickListener() {
+
+        no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent,10);
+                dialog.dismiss();
             }
         });
 
-        mainUser=findViewById(R.id.rviewmainUser);
-        mainUser.setLayoutManager(new LinearLayoutManager(this));
-        adapter=new UserAdapter(MainActivity.this, usersArrayList);
-        mainUser.setAdapter(adapter);
+        dialog.show();
+    }
 
-        if(auth.getCurrentUser()==null){
-            Intent intent=new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
-        }
+    private void goToSettingActivity() {
+        Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+        startActivity(intent);
+    }
+
+    private void startImageCaptureIntent() {
+        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, 10);
     }
 }

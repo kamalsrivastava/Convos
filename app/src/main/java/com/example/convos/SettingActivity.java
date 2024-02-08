@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,131 +27,108 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-import java.net.URI;
-
 public class SettingActivity extends AppCompatActivity {
 
-    ImageView setProfile;
-    EditText setname,setstatus;
-    Button donebut;
-    FirebaseAuth auth;
-    final FirebaseDatabase[] database = {null};
-    final FirebaseStorage[] storage = {null};
-    String email,password,cnfpassword;
-    Uri setImageUri;
+    private static final int PICK_IMAGE_REQUEST = 10;
+
+    private EditText setname, setstatus;
+    private ImageView setProfile;
+    private Button donebut;
+
+    private FirebaseAuth auth;
+    private FirebaseDatabase database;
+    private FirebaseStorage storage;
+    private DatabaseReference userReference;
+    private StorageReference uploadReference;
+    private Uri setImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
 
-        auth=FirebaseAuth.getInstance();
-        database[0]=FirebaseDatabase.getInstance();
-        storage[0]=FirebaseStorage.getInstance();
-        donebut=findViewById(R.id.donebut);
-        setProfile=findViewById(R.id.settingprofile);
-        setname=findViewById(R.id.settingname);
-        setstatus=findViewById(R.id.settingstatus);
+        auth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
+        storage = FirebaseStorage.getInstance();
+        userReference = database.getReference().child("user").child(auth.getUid());
+        uploadReference = storage.getReference().child("Upload").child(auth.getUid());
 
-        DatabaseReference reference=database[0].getReference().child("user").child(auth.getUid());
-        StorageReference storageReference=storage[0].getReference().child("Upload").child(auth.getUid());
-        reference.addValueEventListener(new ValueEventListener() {
+        initializeViews();
+        loadUserData();
+
+        setProfile.setOnClickListener(view -> chooseImage());
+        donebut.setOnClickListener(view -> saveUserData());
+    }
+
+    private void initializeViews() {
+        setname = findViewById(R.id.settingname);
+        setstatus = findViewById(R.id.settingstatus);
+        setProfile = findViewById(R.id.settingprofile);
+        donebut = findViewById(R.id.donebut);
+    }
+
+    private void loadUserData() {
+        userReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                email=snapshot.child("mail").getValue().toString();
-                password=snapshot.child("password").getValue().toString();
-                cnfpassword=snapshot.child("cnfpassword").getValue().toString();
-                String name=snapshot.child("userName").getValue().toString();
-                String profile=snapshot.child("profilepic").getValue().toString();
-                String status=snapshot.child("status").getValue().toString();
-                setname.setText(name);
-                setstatus.setText(status);
-                Picasso.get().load(profile).into(setProfile);
+                setname.setText(snapshot.child("userName").getValue(String.class));
+                setstatus.setText(snapshot.child("status").getValue(String.class));
+                Picasso.get().load(snapshot.child("profilepic").getValue(String.class)).into(setProfile);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Toast.makeText(SettingActivity.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
             }
         });
-        setProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"),10);
-
-            }
-        });
-        donebut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name=setname.getText().toString();
-                String status=setstatus.getText().toString();
-                if(setImageUri!=null){
-                    storageReference.putFile(setImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                            storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    String finalImageUri=uri.toString();
-                                    Users users=new Users(auth.getUid(),name,email,password,cnfpassword,finalImageUri,status);
-                                    reference.setValue(users).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                Toast.makeText(SettingActivity.this,"DataisSave",Toast.LENGTH_SHORT);
-                                                Intent intent=new Intent(SettingActivity.this,MainActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                            }
-                                            else{
-                                                Toast.makeText(SettingActivity.this,"Something went wrong....",Toast.LENGTH_SHORT);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-                else{
-                    storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            String finalImageUri=uri.toString();
-                            Users users=new Users(auth.getUid(),name,email,password,cnfpassword,finalImageUri,status);
-                            reference.setValue(users).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        Toast.makeText(SettingActivity.this,"DataisSave",Toast.LENGTH_SHORT);
-                                        Intent intent=new Intent(SettingActivity.this,MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                    else{
-                                        Toast.makeText(SettingActivity.this,"Something went wrong....",Toast.LENGTH_SHORT);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-        });
-
     }
-    @Override
-    protected void onActivityResult(int requestCode,int resultCode, @Nullable Intent data){
-        super.onActivityResult(requestCode,resultCode,data);
-        if(requestCode==10){
-            if(data!=null){
-                setImageUri=data.getData();
-                setProfile.setImageURI(setImageUri);
+
+    private void chooseImage() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    private void saveUserData() {
+        String name = setname.getText().toString();
+        String status = setstatus.getText().toString();
+
+        if (setImageUri != null) {
+            uploadReference.putFile(setImageUri).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    uploadReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String imageUrl = uri.toString();
+                        updateUserProfile(name, status, imageUrl);
+                    });
+                } else {
+                    Toast.makeText(SettingActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            updateUserProfile(name, status, null);
+        }
+    }
+
+    private void updateUserProfile(String name, String status, String imageUrl) {
+        Users user = new Users(auth.getUid(), name, auth.getCurrentUser().getEmail(), "", "", imageUrl, status);
+        userReference.setValue(user).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(SettingActivity.this, "Data saved successfully", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SettingActivity.this, MainActivity.class));
+                finish();
+            } else {
+                Toast.makeText(SettingActivity.this, "Failed to save data", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            setImageUri = data.getData();
+            setProfile.setImageURI(setImageUri);
         }
     }
 }

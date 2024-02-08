@@ -1,8 +1,5 @@
 package com.example.convos;
 
-import static com.example.convos.ChatActivity.reciverIImg;
-import static com.example.convos.ChatActivity.senderImg;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +22,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
     ArrayList<MessageModelClass> messagesAdapterArrayList;
     int ITEM_SEND=1;
     int ITEM_RECIVE=2;
+    FirebaseAuth auth;
 
     public MessageAdapter(Context context, ArrayList<MessageModelClass> messagesAdapterArrayList) {
         this.context = context;
@@ -50,12 +48,12 @@ public class MessageAdapter extends RecyclerView.Adapter {
         if(holder.getClass()==senderViewHolder.class){
             senderViewHolder viewHolder=(senderViewHolder) holder;
             viewHolder.msgtxt.setText(msgs.getMessage());
-            Picasso.get().load(senderImg).into(viewHolder.circleImageView);
+            Picasso.get().load(ChatActivity.senderImg).into(viewHolder.circleImageView);
         }
         else{
             recieverViewHolder viewHolder=(recieverViewHolder) holder;
             viewHolder.msgtxt.setText(msgs.getMessage());
-            Picasso.get().load(reciverIImg).into(viewHolder.circleImageView);
+            Picasso.get().load(ChatActivity.reciverIImg).into(viewHolder.circleImageView);
         }
     }
 
@@ -95,5 +93,4 @@ public class MessageAdapter extends RecyclerView.Adapter {
             msgtxt=itemView.findViewById(R.id.recivertextset);
         }
     }
-
 }

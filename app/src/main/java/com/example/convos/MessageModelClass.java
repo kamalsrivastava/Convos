@@ -1,9 +1,9 @@
 package com.example.convos;
 
 public class MessageModelClass {
-    String message;
-    String senderid;
-    long timeStamp;
+    private String message;
+    private String senderid;
+    private long timeStamp;
 
     public MessageModelClass() {
     }
