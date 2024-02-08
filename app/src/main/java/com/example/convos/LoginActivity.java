@@ -70,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
                                 try{
                                     Intent intent=new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
-                                    finish();
                                 }catch (Exception e){
                                     Toast.makeText(LoginActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
                                 }

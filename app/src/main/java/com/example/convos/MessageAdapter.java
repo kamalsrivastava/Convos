@@ -1,7 +1,7 @@
 package com.example.convos;
 
-import static com.example.convos.chatHeadActivity.reciverIImg;
-import static com.example.convos.chatHeadActivity.senderImg;
+import static com.example.convos.ChatActivity.reciverIImg;
+import static com.example.convos.ChatActivity.senderImg;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -19,14 +19,14 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class messageAdapter extends RecyclerView.Adapter {
+public class MessageAdapter extends RecyclerView.Adapter {
 
     Context context;
-    ArrayList<msgModelClass> messagesAdapterArrayList;
+    ArrayList<MessageModelClass> messagesAdapterArrayList;
     int ITEM_SEND=1;
     int ITEM_RECIVE=2;
 
-    public messageAdapter(Context context, ArrayList<msgModelClass> messagesAdapterArrayList) {
+    public MessageAdapter(Context context, ArrayList<MessageModelClass> messagesAdapterArrayList) {
         this.context = context;
         this.messagesAdapterArrayList = messagesAdapterArrayList;
     }
@@ -46,7 +46,7 @@ public class messageAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        msgModelClass msgs=messagesAdapterArrayList.get(position);
+        MessageModelClass msgs=messagesAdapterArrayList.get(position);
         if(holder.getClass()==senderViewHolder.class){
             senderViewHolder viewHolder=(senderViewHolder) holder;
             viewHolder.msgtxt.setText(msgs.getMessage());
@@ -66,7 +66,7 @@ public class messageAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        msgModelClass messages=messagesAdapterArrayList.get(position);
+        MessageModelClass messages=messagesAdapterArrayList.get(position);
         if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(messages.getSenderid())){
             return ITEM_SEND;
         }

@@ -1,14 +1,14 @@
 package com.example.convos;
 
-public class msgModelClass {
+public class MessageModelClass {
     String message;
     String senderid;
     long timeStamp;
 
-    public msgModelClass() {
+    public MessageModelClass() {
     }
 
-    public msgModelClass(String message, String senderid, long timeStamp) {
+    public MessageModelClass(String message, String senderid, long timeStamp) {
         this.message = message;
         this.senderid = senderid;
         this.timeStamp = timeStamp;

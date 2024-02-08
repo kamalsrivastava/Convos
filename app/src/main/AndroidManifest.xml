@@ -16,7 +16,7 @@
             android:name=".SettingActivity"
             android:exported="false" />
         <activity
-            android:name=".chatHeadActivity"
+            android:name=".ChatActivity"
             android:exported="false" />
         <activity
             android:name=".RegistrationActivity"
@@ -25,7 +25,7 @@
             android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".splashActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

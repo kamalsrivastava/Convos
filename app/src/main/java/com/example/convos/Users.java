@@ -1,4 +1,7 @@
 package com.example.convos;
+
+import androidx.annotation.Nullable;
+
 public class Users {
     String profilepic;
     String mail;
