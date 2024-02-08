@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     final FirebaseDatabase[] database = {null};
     ArrayList<Users> usersArrayList;
     ImageView imgLogOut;
+    ImageView cambut,settingbut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
         database[0] =FirebaseDatabase.getInstance();
         auth=FirebaseAuth.getInstance();
+        cambut=findViewById(R.id.camBut);
+        settingbut=findViewById(R.id.settingBut);
 
         DatabaseReference reference=database[0].getReference().child("user");
 
@@ -83,6 +86,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 dialog.show();
+            }
+        });
+
+        settingbut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(MainActivity.this,SettingActivity.class);
+                startActivity(intent);
+            }
+        });
+        cambut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent,10);
             }
         });
 
